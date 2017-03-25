@@ -1,11 +1,15 @@
 from flask import Flask, jsonify, request
 
 import rad_can
-rad_can.load_theme_lineups()
 
 
 __version__ = '0.1.0'
 app = Flask(__name__)
+
+
+@app.before_first_request
+def _run_on_start():
+    rad_can.load_articles(from_file=True)
 
 
 @app.route('/version')
