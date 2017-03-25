@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 @app.before_first_request
 def _run_on_start():
-    rad_can.load_articles(from_file=True)
+    rad_can.load_articles(number=100, from_file=True)
 
 
 @app.route('/version')
