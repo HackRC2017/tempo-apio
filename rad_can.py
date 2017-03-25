@@ -4,8 +4,11 @@ import json
 import os
 import random
 
+import pymongo
 import requests
 
+
+client = pymongo.MongoClient()
 
 _articles = []
 ARTICLES_FILE = 'articles.json'
