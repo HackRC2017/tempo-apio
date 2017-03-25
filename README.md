@@ -12,3 +12,16 @@ pip install -r requirements.txt
 ```shell
 FLASK_APP=tempo_apio.py FLASK_DEBUG=1 flask run
 ```
+
+## docker
+
+```shell
+# building
+docker build -t tempo-apio .
+
+# running
+docker run -d \
+    -p 5001:5001 \
+    --name tempo-apio \
+    tempo-apio
+```
