@@ -1,3 +1,4 @@
+from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, jsonify, request
 
 import rad_can
@@ -9,7 +10,9 @@ app = Flask(__name__)
 
 @app.before_first_request
 def _run_on_start():
-    rad_can.load_articles(number=100, from_file=True)
+    scheduler = BackgroundScheduler()
+    scheduler.start()
+    scheduler.add_job(rad_can.get_new_articles, 'interval', minutes=5)
 
 
 @app.route('/version')
