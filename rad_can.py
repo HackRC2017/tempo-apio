@@ -1,7 +1,6 @@
 import copy
 import itertools
 import json
-import logging
 import random
 
 import requests
