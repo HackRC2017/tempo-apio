@@ -10,5 +10,5 @@ pip install -r requirements.txt
 ## development
 
 ```shell
-FLASK_APP=api.py FLASK_DEBUG=1 flask run
+FLASK_APP=tempo_apio.py FLASK_DEBUG=1 flask run
 ```
