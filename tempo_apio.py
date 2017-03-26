@@ -41,18 +41,22 @@ def fetch_articles(size, max_readtime=0, themes=None):
 
 
 def transform_body(body):
-    for attachment in body['attachments']:
-        # Extract info
-        anchor = attachment['anchor']['fragmentId']
-        legend = html.escape(attachment['conceptualImage']['legend'])
-        alt_text = html.escape(attachment['conceptualImage']['alt'])
-        href = attachment['conceptualImage']['concreteImages'][0]['mediaLink']['href']
+    for attachment in body.get('attachments', []):
 
-        # Substitute comments
-        image_element = f'<img src="{href}" alt="{alt_text}"/>'
-        caption = f'<figcaption>{legend}</figcaption>'
-        pattern = get_anchor_pattern(anchor)
-        body['html'] = re.sub(pattern, image_element + caption, body['html'])
+        try:
+            # Extract info
+            anchor = attachment['anchor']['fragmentId']
+            legend = html.escape(attachment['conceptualImage']['legend'])
+            alt_text = html.escape(attachment['conceptualImage']['alt'])
+            href = attachment['conceptualImage']['concreteImages'][0]['mediaLink']['href']
+
+            # Substitute comments
+            image_element = f'<img src="{href}" alt="{alt_text}"/>'
+            caption = f'<figcaption>{legend}</figcaption>'
+            pattern = get_anchor_pattern(anchor)
+            body['html'] = re.sub(pattern, image_element + caption, body['html'])
+        except KeyError:
+            pass
 
     return body
 
@@ -72,10 +76,7 @@ def get_articles():
 
     articles = list(fetch_articles(size, max_readtime, themes))
     for article in articles:
-        try:
-            article["body"] = transform_body(article["body"])
-        except KeyError:
-            pass
+        article["body"] = transform_body(article["body"])
     payload = dumps({'articles': articles})
     return Response(response=payload,
                     mimetype="application/json")
