@@ -51,7 +51,7 @@ def transform_body(body):
             href = attachment['conceptualImage']['concreteImages'][0]['mediaLink']['href']
 
             # Substitute comments
-            image_element = f'<img src="{href}" alt="{alt_text}"/>'
+            image_element = f'<img src="{href}" alt="{alt_text}">'
             caption = f'<figcaption>{legend}</figcaption>'
             pattern = get_anchor_pattern(anchor)
             body['html'] = re.sub(pattern, image_element + caption, body['html'])
