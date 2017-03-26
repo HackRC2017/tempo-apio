@@ -29,6 +29,7 @@ def fetch_articles(size, max_readtime=0, themes=None):
         query_filter['themeTag.id'] = {'$in': themes}
 
     return articles.find(query_filter)\
+                   .sort('publishedFirstTimeAt', pymongo.DESCENDING)\
                    .limit(size)
 
 @app.route('/version')
