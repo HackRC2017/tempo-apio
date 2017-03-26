@@ -27,5 +27,6 @@ docker run -d \
     -p 5001:5001 \
     --name tempo-apio \
     --link tempo-mongo:mongo \
+    -e 'MONGODB_HOST=mongo' \
     tempo-apio
 ```
