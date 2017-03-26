@@ -1,11 +1,11 @@
 import os
 
+import pymongo
 from bson.json_util import dumps
 from flask import Flask
 from flask import jsonify
 from flask import request
 from flask import Response
-from pymongo import MongoClient
 
 
 __version__ = '0.1.0'
@@ -16,7 +16,7 @@ MONGODB_HOST = os.environ.get('MONGODB_HOST', 'localhost')
 MONGODB_PORT = os.environ.get('MONGODB_PORT', 27017)
 MONGODB_DB = os.environ.get('MONGODB_DB', 'tempo')
 
-mongo_client = MongoClient(MONGODB_HOST, MONGODB_PORT)
+mongo_client = pymongo.MongoClient(MONGODB_HOST, MONGODB_PORT)
 db = mongo_client[MONGODB_DB]
 articles = db.articles
 
@@ -42,6 +42,12 @@ def get_articles():
     payload = dumps({'articles': list(fetch_articles(size, max_readtime))})
     return Response(response=payload,
                     mimetype="application/json")
+
+
+@app.route('/caneton_stats')
+def get_caneton_stats():
+    s = db.stats.find({}, {'_id': False}).sort('datetime', pymongo.DESCENDING)
+    return jsonify(list(s))
 
 
 if __name__ == '__main__':
