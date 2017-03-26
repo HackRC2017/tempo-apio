@@ -1,4 +1,7 @@
+import functools
+import html
 import os
+import re
 
 import pymongo
 from bson.json_util import dumps
@@ -21,6 +24,10 @@ db = mongo_client[MONGODB_DB]
 articles = db.articles
 
 
+@functools.lru_cache(maxsize=64)
+def get_anchor_pattern(anchor):
+    return re.compile(r'<!--.*?' + anchor + '\\"\}-->')
+
 def fetch_articles(size, max_readtime=0, themes=None):
     query_filter = {}
     if max_readtime > 0:
@@ -31,6 +38,24 @@ def fetch_articles(size, max_readtime=0, themes=None):
     return articles.find(query_filter)\
                    .sort('publishedFirstTimeAt', pymongo.DESCENDING)\
                    .limit(size)
+
+
+def transform_body(body):
+    for attachment in body['attachments']:
+        # Extract info
+        anchor = attachment['anchor']['fragmentId']
+        legend = html.escape(attachment['conceptualImage']['legend'])
+        alt_text = html.escape(attachment['conceptualImage']['alt'])
+        href = attachment['conceptualImage']['concreteImages'][0]['mediaLink']['href']
+
+        # Substitute comments
+        image_element = f'<img src="{href}" alt="{alt_text}"/>'
+        caption = f'<figcaption>{legend}</figcaption>'
+        pattern = get_anchor_pattern(anchor)
+        body['html'] = re.sub(pattern, image_element + caption, body['html'])
+
+    return body
+
 
 @app.route('/version')
 def get_version():
@@ -44,7 +69,14 @@ def get_articles():
     themes = request.args.get('themes')
     if themes:
         themes = themes.split(',')
-    payload = dumps({'articles': list(fetch_articles(size, max_readtime, themes))})
+
+    articles = list(fetch_articles(size, max_readtime, themes))
+    for article in articles:
+        try:
+            article["body"] = transform_body(article["body"])
+        except KeyError:
+            pass
+    payload = dumps({'articles': articles})
     return Response(response=payload,
                     mimetype="application/json")
 
