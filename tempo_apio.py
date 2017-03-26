@@ -21,12 +21,13 @@ db = mongo_client[MONGODB_DB]
 articles = db.articles
 
 
-def fetch_articles(size, max_readtime):
-    query_filter = {
-        'readTime.total.minutes': {
-            '$lte': max_readtime
-        }
-    }
+def fetch_articles(size, max_readtime=0, themes=None):
+    query_filter = {}
+    if max_readtime > 0:
+        query_filter['readTime.total.minutes'] = {'$lte': max_readtime}
+    if themes:
+        query_filter['themeTag.id'] = {'$in': themes}
+
     return articles.find(query_filter)\
                    .limit(size)
 
@@ -39,7 +40,10 @@ def get_version():
 def get_articles():
     max_readtime = request.args.get('max_readtime', default=10, type=int)
     size = request.args.get('size', default=10, type=int)
-    payload = dumps({'articles': list(fetch_articles(size, max_readtime))})
+    themes = request.args.get('themes')
+    if themes:
+        themes = themes.split(',')
+    payload = dumps({'articles': list(fetch_articles(size, max_readtime, themes))})
     return Response(response=payload,
                     mimetype="application/json")
 
