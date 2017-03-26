@@ -20,12 +20,12 @@ FLASK_APP=tempo_apio.py FLASK_DEBUG=1 flask run
 docker build -t tempo-apio .
 
 # start mongo
-docker run --name some-mongo -d mongo
+docker run --name tempo-mongo -d mongo
 
 # run api
 docker run -d \
     -p 5001:5001 \
-    --link some-mongo:mongo \
     --name tempo-apio \
+    --link tempo-mongo:mongo \
     tempo-apio
 ```
